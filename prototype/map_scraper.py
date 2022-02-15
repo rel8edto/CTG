@@ -14,7 +14,7 @@ def map_api(filename: str, zoom: int, map_api: str):
     Args:
         filename (str): name of the directory where cooridantes are located
         zoom (int): The zoom level of the map
-        map_api (int): Determine which api to use between google=0 and mapbox=1
+        map_api (str): Determine which api to use between google='google' and mapbox='mapbox'
     """
     
     # Check the name of file
@@ -51,7 +51,7 @@ def map_api(filename: str, zoom: int, map_api: str):
                 f.write(res_google.content)
     
                 image = Image.open(f"{company_name}.png")
-                image.save('CTG/prototype/train_data/' + sub_dir)
+                image.save(f'CTG/prototype/train_data/{sub_dir}/{company_name + ".png"}','png')
                 
 
         elif map_api == 'mapbox':
@@ -62,7 +62,7 @@ def map_api(filename: str, zoom: int, map_api: str):
                 f.write(res_map_box.content)
     
                 image = Image.open("gfg.png")
-                image.save('CTG/prototype/train_data/' + sub_dir)
+                image.save('')
 
         else:
             print("Please specify static map API server")
