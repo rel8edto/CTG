@@ -1,5 +1,5 @@
 from PIL import Image, ImageFile
-# from config.credentials import GOOGLE_API_KEY, MAP_BOX_API_KEY
+from config.credentials import GOOGLE_API_KEY, MAP_BOX_API_KEY
 from io import BytesIO
 import pandas as pd
 import requests
@@ -41,7 +41,7 @@ def map_api(filename: str, zoom: int, map_api: str):
         if map_api == 'google':
             # Connect to API server
             res_google = requests.get(
-                f'https://maps.googleapis.com/maps/api/staticmap?center={latitude},{longitude}&zoom={zoom}&size=600x600&maptype=satellite&key=')
+                f'https://maps.googleapis.com/maps/api/staticmap?center={latitude},{longitude}&zoom={zoom}&size=600x600&maptype=satellite&key={GOOGLE_API_KEY}')
             
             # # Truncate the png files 
             # ImageFile.LOAD_TRUNCATED_IMAGES = True
@@ -51,9 +51,9 @@ def map_api(filename: str, zoom: int, map_api: str):
                 f.write(res_google.content)
     
                 image = Image.open(f"{company_name}.png")
-                image.save(f'CTG/prototype/train_data/{sub_dir}/{company_name + ".png"}','png')
-                
-
+                # image.save(f'CTG/prototype/train_data/{sub_dir}/{company_name + ".png"}','png')
+                image.show(f"{company_name}.png")
+    
         elif map_api == 'mapbox':
             res_map_box = requests.get(
                 f'https://api.mapbox.com/styles/v1/mapbox/satellite-v9/static/{longitude},{latitude},{zoom}/600x600?access_token={MAP_BOX_API_KEY}')
@@ -62,7 +62,7 @@ def map_api(filename: str, zoom: int, map_api: str):
                 f.write(res_map_box.content)
     
                 image = Image.open("gfg.png")
-                image.save('')
+                image.save(f'CTG/prototype/train_data/{sub_dir}/{company_name + ".png"}', 'png')
 
         else:
             print("Please specify static map API server")
@@ -70,5 +70,5 @@ def map_api(filename: str, zoom: int, map_api: str):
 
 if __name__ == '__main__':
     # corp = map_api('CTG/prototype/train_data/corporatebuilding.csv', 21, 'google')
-    manufact = map_api('CTG/prototype/train_data/corporatebuilding.csv', 21, 'google')
+    manufact = map_api('CTG/prototype/train_data/corporatebuilding.csv', 26, 'google')
     
