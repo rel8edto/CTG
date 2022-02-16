@@ -1,5 +1,5 @@
 from PIL import Image, ImageFile
-# from config.credentials import GOOGLE_API_KEY, MAP_BOX_API_KEY
+from config.credentials import GOOGLE_API_KEY, MAP_BOX_API_KEY
 from io import BytesIO
 import pandas as pd
 import requests
@@ -41,7 +41,7 @@ def map_api(filename: str, zoom: int, map_api: str):
         if map_api == 'google':
             # Connect to API server
             res_google = requests.get(
-                f'https://maps.googleapis.com/maps/api/staticmap?center={latitude},{longitude}&zoom={zoom}&size=600x600&maptype=satellite&key=AIzaSyBfdq7M_8JLQQrTFeyEaStpl4EoxOsb-tY')
+                f'https://maps.googleapis.com/maps/api/staticmap?center={latitude},{longitude}&zoom={zoom}&size=600x600&maptype=satellite&key={GOOGLE_API_KEY}')
             
             # # Truncate the png files 
             # ImageFile.LOAD_TRUNCATED_IMAGES = True
@@ -69,5 +69,6 @@ def map_api(filename: str, zoom: int, map_api: str):
 
 
 if __name__ == '__main__':
-    test = map_api('CTG/prototype/train_data/corporatebuilding.csv', 21, 'google')
-    print(test)
+    # corp = map_api('CTG/prototype/train_data/corporatebuilding.csv', 21, 'google')
+    manufact = map_api('CTG/prototype/train_data/corporatebuilding.csv', 25, 'google')
+    
