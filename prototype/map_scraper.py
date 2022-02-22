@@ -1,5 +1,5 @@
 from PIL import Image, ImageFile
-from config.credentials import GOOGLE_API_KEY, MAP_BOX_API_KEY
+from credentials import GOOGLE_API_KEY, MAP_BOX_API_KEY
 from io import BytesIO
 import pandas as pd
 import requests
@@ -22,10 +22,10 @@ def map_api(filename: str, zoom: int, map_api: str):
     sub_dir = os.path.splitext(file_name)[0]
 
     # Create directory if it doesn't exist
-    isExist = os.path.exists('CTG/prototype/train_data/' + sub_dir)
+    isExist = os.path.exists('prototype/train_data/images/' + sub_dir)
 
     if not isExist:
-        os.makedirs('CTG/prototype/train_data/' + sub_dir)
+        os.makedirs('prototype/train_data/images/' + sub_dir)
     
     # Iterate through csv files and convert to pandas format
     df = pd.read_csv(filename)
@@ -34,8 +34,14 @@ def map_api(filename: str, zoom: int, map_api: str):
     for idx in range(len(df)):
 
         latitude = df['latitude'][idx]
-        longitude = df['Longitude'][idx]
+        longitude = df['longitude'][idx]
         company_name = df['name'][idx]
+        
+        # skip image if it already exists. If you want to refresh existing images, please delete the old ones
+        # first or comment out these two lines
+        if os.path.exists(f"prototype/train_data/images/{sub_dir}/{company_name}.png"):
+            continue
+
         print(longitude, latitude, company_name)
 
         if map_api == 'google':
@@ -46,13 +52,13 @@ def map_api(filename: str, zoom: int, map_api: str):
             # # Truncate the png files 
             # ImageFile.LOAD_TRUNCATED_IMAGES = True
             
-            with open(f"{company_name}.png", "wb") as f:
+            with open(f"prototype/train_data/images/{sub_dir}/{company_name}.png", "wb") as f:
                
                 f.write(res_google.content)
     
-                image = Image.open(f"{company_name}.png")
-                # image.save(f'CTG/prototype/train_data/{sub_dir}/{company_name + ".png"}','png')
-                image.show(f"{company_name}.png")
+                #image = Image.open(f"{company_name}.png")
+                #image.save(f'prototype/train_data/images/{sub_dir}/{company_name + ".png"}','png')
+                #image.show(f"{company_name}.png")
     
         elif map_api == 'mapbox':
             res_map_box = requests.get(
@@ -62,7 +68,7 @@ def map_api(filename: str, zoom: int, map_api: str):
                 f.write(res_map_box.content)
     
                 image = Image.open("gfg.png")
-                image.save(f'CTG/prototype/train_data/{sub_dir}/{company_name + ".png"}', 'png')
+                image.save(f'prototype/train_data/images/{sub_dir}/{company_name + ".png"}', 'png')
 
         else:
             print("Please specify static map API server")
@@ -70,5 +76,5 @@ def map_api(filename: str, zoom: int, map_api: str):
 
 if __name__ == '__main__':
     # corp = map_api('CTG/prototype/train_data/corporatebuilding.csv', 21, 'google')
-    manufact = map_api('CTG/prototype/train_data/corporatebuilding.csv', 26, 'google')
+    manufact = map_api('prototype/train_data/csvs/religious.csv', 20, 'google')
     
