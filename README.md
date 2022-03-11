@@ -9,3 +9,17 @@
 | `FeatureClass` | The industry for the cooridantes |
 | `FeatureType` | The industry type for the cooridantes |
 | `FeatureSubType` | The sector of the companies that the cooridantes |
+***
+
+## ML Work Flow
+***
+
+- [x] Build a map api to download images.
+- [x] Use map api to pull images into sub directory.
+- [x] Visualize the data to determine the zoom that will work for the dataset.
+- [ ] Annotate images to create a solid training and test set.()
+- [ ] Build a Object oriented model using YOLO.
+- [ ] Build a CNN model to determine if classification is possible 
+
+
+
