@@ -1,3 +1,4 @@
+#There's alot of installed modules for this, you will need to grab them to get this to run
 # for loading/processing the images  
 from keras.preprocessing.image import load_img 
 from keras.preprocessing.image import img_to_array 
@@ -10,8 +11,10 @@ from keras.models import Model
 # clustering and dimension reduction
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
-
+from sklearn.manifold import TSNE
+#import hdbscan
 # for everything else
+import copy
 import os
 import numpy as np
 import matplotlib.pyplot as plt
@@ -71,22 +74,70 @@ pca.fit(feat)
 x = pca.transform(feat)
 
 # cluster feature vectors
-kmeans = KMeans(n_clusters=2,random_state=22) #as there should only be 2 clusters
+k=2
+kmeans = KMeans(n_clusters=k,random_state=22) #as there should only be 2 clusters
 kmeans.fit(x)
 # holds the cluster id and the images { id: [images] }
 groups = {}
+y=copy.deepcopy(x)
+c=kmeans.cluster_centers_
+y=np.append(y,c,axis=0)
+projection=TSNE().fit_transform(y)
 emergency_counts=[0,0]
 religious_counts=[0,0]
+col=[]
+edge=[]
+lab=[]
+label=[]
 for file, cluster in zip(filenames,kmeans.labels_):
     if emergency==os.path.dirname(file):
         emergency_counts[cluster]+=1
+        col.append('g')
+        lab.append('Emergency')
+        if cluster==1:
+            edge.append('m')
+            label.append('Cluster 1')
+        else:
+            edge.append('y')
+            label.append('Cluster 0')
     elif religious==os.path.dirname(file):
         religious_counts[cluster]+=1
+        col.append('b')
+        lab.append('Religious')
+        if cluster==1:
+            edge.append('m')
+            label.append('Cluster 1')
+        else:
+            edge.append('y')
+            label.append('Cluster 0')
     if cluster not in groups.keys():
         groups[cluster] = []
         groups[cluster].append(file)
     else:
         groups[cluster].append(file)
+for l in range(k):
+    col.append('r')
+    lab.append('cluster center')
+    label.append('cluster center')
+    edge.append('r')
+visited=set()
+for loc,c,lb in zip(projection,col,lab):
+    if lb not in visited:
+        visited.add(lb)
+        plt.scatter(*loc,c=c,label=lb)
+    else:
+        plt.scatter(*loc,c=c)
+plt.legend()
+plt.show()
+visited=set()
+for loc,c,lb in zip(projection,edge,label):
+    if lb not in visited:
+        visited.add(lb)
+        plt.scatter(*loc,c=c,label=lb)
+    else:
+        plt.scatter(*loc,c=c)
+plt.legend()
+plt.show()
 print("emergency:"+str(emergency_counts))
 print("religious:"+str(religious_counts))
 # function that lets you view a cluster (based on identifier)        
@@ -105,11 +156,9 @@ def view_cluster(cluster):
         img = np.array(img)
         plt.imshow(img)
         plt.axis('off')
-        
-   
 # this is just incase you want to see which value for k might be the best 
 sse = []
-list_k = list(range(1, 50))
+list_k = list(range(1, 20))
 
 for k in list_k:
     km = KMeans(n_clusters=k, random_state=22)
@@ -123,3 +172,5 @@ plt.plot(list_k, sse)
 plt.xlabel(r'Number of clusters *k*')
 plt.ylabel('Sum of squared distance');
 plt.show()
+#HDBSCAN coded below here
+
