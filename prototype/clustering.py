@@ -10,9 +10,9 @@ from keras.models import Model
 
 # clustering and dimension reduction
 from sklearn.cluster import KMeans
+from sklearn.cluster import DBSCAN
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
-#import hdbscan
 # for everything else
 import copy
 import os
@@ -121,6 +121,7 @@ for l in range(k):
     label.append('cluster center')
     edge.append('r')
 visited=set()
+plt.figure(figsize=(6,4))
 for loc,c,lb in zip(projection,col,lab):
     if lb not in visited:
         visited.add(lb)
@@ -129,6 +130,7 @@ for loc,c,lb in zip(projection,col,lab):
         plt.scatter(*loc,c=c)
 plt.legend()
 plt.show()
+plt.figure(figsize=(6,4))
 visited=set()
 for loc,c,lb in zip(projection,edge,label):
     if lb not in visited:
@@ -168,9 +170,69 @@ for k in list_k:
 
 # Plot sse against k
 print(sse)
+plt.figure(figsize=(6,4))
 plt.plot(list_k, sse)
 plt.xlabel(r'Number of clusters *k*')
 plt.ylabel('Sum of squared distance');
 plt.show()
-#HDBSCAN coded below here
-
+#DBSCAN coded below here
+maxn=0
+maxe=0
+maxs=0
+colors=['r','g','b','c','y','m','k','tab:orange','tab:brown']
+plt.figure(figsize=(6,4))
+visited=set()
+list_eps=list(range(1,50,1))
+for n in range(2,11):
+    for e in list_eps:
+        db=DBSCAN(eps=e,min_samples=n).fit(x)
+        labels = db.labels_
+        n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
+        n_noise_ = list(labels).count(-1)
+        if n_clusters_>=2:
+            emergency_counts=[]
+            religious_counts=[]
+            for i in range(n_clusters_):
+                emergency_counts.append(0)
+                religious_counts.append(0)
+            print("Current eps,n: %d, %d" %(e,n))
+            print("Estimated number of clusters, noise points: %d, %d" % (n_clusters_,n_noise_))
+            for file, cluster in zip(filenames, labels):
+                if cluster==-1:
+                    continue
+                if emergency==os.path.dirname(file):
+                    emergency_counts[cluster]+=1
+                elif religious==os.path.dirname(file):
+                    religious_counts[cluster]+=1
+            emergency_success=0
+            religious_success=0
+            for i in range(n_clusters_):
+                if emergency_counts[i]>religious_counts[i]:
+                    emergency_success+=emergency_counts[i]
+                if emergency_counts[i]<religious_counts[i]:
+                    religious_success+=religious_counts[i]
+            #these are hardcoded because I'm lazy
+            total_success=(emergency_success+religious_success)/2443
+            print("Emergency success %:"+str(emergency_success/1462))
+            print("Relgiious success %:"+str(religious_success/981))
+            print("Total success %:"+str(total_success))
+            if str(n) not in visited:
+                plt.scatter(e,total_success,label=str(n),c=colors[n-2])
+                visited.add(str(n))
+            else:
+                plt.scatter(e,total_success,c=colors[n-2])
+            if total_success>maxs:
+                maxs=total_success
+                maxn=n
+                maxe=e
+        else:
+            if str(n) not in visited:
+                plt.scatter(e,0,label=str(n),c=colors[n-2])
+                visited.add(str(n))
+            else:
+                plt.scatter(e,0,c=colors[n-2])
+plt.legend(title="Minimum number of\n elements in a cluster:")
+plt.xlabel("Maximum distance between 2 points")
+plt.ylabel("Sorting accuracy")
+plt.show()
+print("Maximum n,e,success: %d, %d, %f" %(maxn,maxe,maxs))
