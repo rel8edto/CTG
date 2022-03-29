@@ -69,10 +69,48 @@ feat = np.array(list(data.values()))
 # reshape so that there are 210 samples of 4096 vectors
 feat = feat.reshape(-1,4096)
 # reduce the amount of dimensions in the feature vector
-pca = PCA(n_components=10, random_state=22)
-pca.fit(feat)
-x = pca.transform(feat)
-
+maxp=0
+maxk=0
+maxs=0
+for n in range(1,101): #need to update for real runs
+    pca = PCA(n_components=n, random_state=22)
+    pca.fit(feat)
+    x = pca.transform(feat)
+    print(sum(pca.explained_variance_ratio_))
+    for k in range(2,50):
+        kmeans=KMeans(n_clusters=k,random_state=22)
+        kmeans.fit(x)
+        counts=np.bincount(kmeans.labels_)
+        if len(np.where(counts>1)[0])!=k: #check to ensure clusters have more than 1 element
+            continue
+        emergency_counts=[]
+        religious_counts=[]
+        for i in range(k):
+            emergency_counts.append(0)
+            religious_counts.append(0)
+        for file, cluster in zip(filenames, kmeans.labels_):
+            if emergency==os.path.dirname(file):
+                emergency_counts[cluster]+=1
+            elif religious==os.path.dirname(file):
+                religious_counts[cluster]+=1
+        emergency_success=0
+        religious_success=0
+        for i in range(k):
+            if emergency_counts[i]>religious_counts[i]:
+                emergency_success+=emergency_counts[i]
+            if emergency_counts[i]<religious_counts[i]:
+                religious_success+=religious_counts[i]
+        #these are hardcoded because I'm lazy
+        total_success=(emergency_success+religious_success)/2443
+        print("Current n,k: %d, %d" %(n,k))
+        print("Emergency success %:"+str(emergency_success/1462))
+        print("Relgiious success %:"+str(religious_success/981))
+        print("Total success %:"+str(total_success))
+        if total_success>maxs:
+            maxs=total_success
+            maxp=n
+            maxk=k
+print("Maximum n,k,success: %d, %d, %f" %(maxp,maxk,maxs))
 # cluster feature vectors
 k=2
 kmeans = KMeans(n_clusters=k,random_state=22) #as there should only be 2 clusters
