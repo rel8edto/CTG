@@ -9,3 +9,9 @@
 | `FeatureClass` | The industry for the cooridantes |
 | `FeatureType` | The industry type for the cooridantes |
 | `FeatureSubType` | The sector of the companies that the cooridantes |
+
+Running the webapp:
+
+```bash
+streamlit run main.py
+```
